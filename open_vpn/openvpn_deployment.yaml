@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: openvpn-depl
+  name: openvpn-depl
+  namespace: openvpn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openvpn-depl
+  template:
+    metadata:
+      labels:
+        app: openvpn-depl
+    spec:
+      containers:
+        - image: openvpn/openvpn-as
+          name: openvpn
+          volumeMounts:
+            - name: openvpn-data
+              mountPath: /app/data/openvpn
+          ports:
+            - containerPort: 943
+              name: admin-web
+            - containerPort: 443
+              name: client-web
+            - containerPort: 1194
+              name: openvpn-udp
+              protocol: UDP
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - MKNOD
+      volumes:
+        - name: openvpn-data
+          persistentVolumeClaim:
+            claimName: openvpn-data
